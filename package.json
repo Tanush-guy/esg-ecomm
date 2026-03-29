@@ -10,7 +10,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "tsc -p tsconfig.server.json",
-    "build:edge": "esbuild cloudflare/worker.ts --bundle --platform=browser --format=esm --minify --outfile=cloudflare/dist/worker.mjs",
+    "build:edge": "esbuild cloudflare/worker.ts --bundle --platform=browser --format=esm --minify --outfile=cloudflare/worker.bundle.mjs",
     "preview": "vite preview",
     "start": "node dist-server/server/index.js",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit"
