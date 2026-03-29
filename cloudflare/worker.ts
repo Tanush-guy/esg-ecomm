@@ -118,71 +118,75 @@ const allowedOrigins = new Set([
   'http://127.0.0.1:4173',
 ]);
 
-const schemaSql = `
-  CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    price REAL NOT NULL,
-    image TEXT NOT NULL,
-    category TEXT NOT NULL,
-    description TEXT NOT NULL,
-    inventory_count INTEGER NOT NULL DEFAULT 0,
-    sold_count INTEGER NOT NULL DEFAULT 0,
-    is_active INTEGER NOT NULL DEFAULT 1,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY,
-    order_number TEXT NOT NULL UNIQUE,
-    request_id TEXT NOT NULL UNIQUE,
-    customer_name TEXT NOT NULL,
-    customer_email TEXT NOT NULL,
-    customer_phone TEXT NOT NULL,
-    customer_address TEXT NOT NULL,
-    status TEXT NOT NULL,
-    subtotal REAL NOT NULL,
-    tax REAL NOT NULL,
-    shipping REAL NOT NULL,
-    handling REAL NOT NULL,
-    total REAL NOT NULL,
-    item_count INTEGER NOT NULL,
-    source TEXT NOT NULL,
-    email_notification_status TEXT NOT NULL,
-    email_notification_error TEXT,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    delivered_at TEXT
-  );
-
-  CREATE TABLE IF NOT EXISTS order_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_id TEXT NOT NULL,
-    product_id INTEGER NOT NULL,
-    product_name TEXT NOT NULL,
-    category TEXT NOT NULL,
-    image TEXT NOT NULL,
-    unit_price REAL NOT NULL,
-    quantity INTEGER NOT NULL,
-    line_total REAL NOT NULL
-  );
-
-  CREATE TABLE IF NOT EXISTS order_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_id TEXT NOT NULL,
-    event_type TEXT NOT NULL,
-    event_message TEXT NOT NULL,
-    created_at TEXT NOT NULL
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-  CREATE INDEX IF NOT EXISTS idx_products_active ON products(is_active);
-  CREATE INDEX IF NOT EXISTS idx_orders_status_created_at ON orders(status, created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON orders(customer_email);
-  CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
-`;
+const schemaStatements = [
+  `
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      price REAL NOT NULL,
+      image TEXT NOT NULL,
+      category TEXT NOT NULL,
+      description TEXT NOT NULL,
+      inventory_count INTEGER NOT NULL DEFAULT 0,
+      sold_count INTEGER NOT NULL DEFAULT 0,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `,
+  `
+    CREATE TABLE IF NOT EXISTS orders (
+      id TEXT PRIMARY KEY,
+      order_number TEXT NOT NULL UNIQUE,
+      request_id TEXT NOT NULL UNIQUE,
+      customer_name TEXT NOT NULL,
+      customer_email TEXT NOT NULL,
+      customer_phone TEXT NOT NULL,
+      customer_address TEXT NOT NULL,
+      status TEXT NOT NULL,
+      subtotal REAL NOT NULL,
+      tax REAL NOT NULL,
+      shipping REAL NOT NULL,
+      handling REAL NOT NULL,
+      total REAL NOT NULL,
+      item_count INTEGER NOT NULL,
+      source TEXT NOT NULL,
+      email_notification_status TEXT NOT NULL,
+      email_notification_error TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      delivered_at TEXT
+    )
+  `,
+  `
+    CREATE TABLE IF NOT EXISTS order_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id TEXT NOT NULL,
+      product_id INTEGER NOT NULL,
+      product_name TEXT NOT NULL,
+      category TEXT NOT NULL,
+      image TEXT NOT NULL,
+      unit_price REAL NOT NULL,
+      quantity INTEGER NOT NULL,
+      line_total REAL NOT NULL
+    )
+  `,
+  `
+    CREATE TABLE IF NOT EXISTS order_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id TEXT NOT NULL,
+      event_type TEXT NOT NULL,
+      event_message TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    )
+  `,
+  'CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)',
+  'CREATE INDEX IF NOT EXISTS idx_products_active ON products(is_active)',
+  'CREATE INDEX IF NOT EXISTS idx_orders_status_created_at ON orders(status, created_at DESC)',
+  'CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)',
+  'CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON orders(customer_email)',
+  'CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id)',
+];
 
 let schemaPromise: Promise<void> | null = null;
 
@@ -517,11 +521,11 @@ function nowIso() {
 }
 
 async function initializeDatabase(env: Env) {
-  await env.DB.exec(schemaSql);
+  await env.DB.batch(schemaStatements.map((statement) => env.DB.prepare(statement)));
 
   const countRow = await env.DB.prepare('SELECT COUNT(*) AS count FROM products').first<{ count: number }>();
 
-  if ((countRow?.count ?? 0) > 0) {
+  if (Number(countRow?.count ?? 0) > 0) {
     return;
   }
 
