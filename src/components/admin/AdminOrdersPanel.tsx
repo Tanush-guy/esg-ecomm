@@ -2,6 +2,7 @@ import { useCallback, useDeferredValue, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { AdminOrdersResponse, OrderRecord, OrderStatus } from '../../../shared/orders';
 import { orderStatuses } from '../../../shared/orders';
+import { apiUrl } from '../../lib/api';
 
 const statusOptions = ['ALL', ...orderStatuses] as const;
 const deliveryTimeline: OrderStatus[] = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
@@ -233,7 +234,7 @@ export function AdminOrdersPanel({ token }: AdminOrdersPanelProps) {
         search: deferredSearch,
       });
 
-      const response = await requestJson<AdminOrdersResponse>(`/api/admin/orders?${query.toString()}`, {
+      const response = await requestJson<AdminOrdersResponse>(apiUrl(`/api/admin/orders?${query.toString()}`), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -257,7 +258,7 @@ export function AdminOrdersPanel({ token }: AdminOrdersPanelProps) {
     setError('');
 
     try {
-      await requestJson<{ order: OrderRecord }>(`/api/admin/orders/${orderId}/status`, {
+      await requestJson<{ order: OrderRecord }>(apiUrl(`/api/admin/orders/${orderId}/status`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

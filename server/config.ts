@@ -14,6 +14,17 @@ function parseBoolean(value: string | undefined, fallback = false) {
   return value === 'true' || value === '1' || value.toLowerCase() === 'yes';
 }
 
+function parseCsv(value: string | undefined) {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
 export const config = {
   host: process.env.HOST ?? '0.0.0.0',
   port: Number(process.env.PORT ?? 3001),
@@ -28,6 +39,7 @@ export const config = {
   smtpPass: process.env.SMTP_PASS ?? '',
   smtpFrom: process.env.SMTP_FROM ?? process.env.SMTP_USER ?? 'Essential Goods <orders@example.com>',
   adminPath: process.env.VITE_ADMIN_PATH ?? '/admin',
+  allowedOrigins: parseCsv(process.env.ALLOWED_ORIGINS),
   nodeEnv: process.env.NODE_ENV ?? 'development',
 };
 

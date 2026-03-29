@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { Product } from '../../data/products';
+import { apiUrl } from '../../lib/api';
 
 interface ProductSummary {
   totalProducts: number;
@@ -97,7 +98,7 @@ export function AdminProductsPanel({ token }: AdminProductsPanelProps) {
     setLoading(true);
 
     try {
-      const response = await requestJson<AdminProductsResponse>('/api/admin/products', {
+      const response = await requestJson<AdminProductsResponse>(apiUrl('/api/admin/products'), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -151,7 +152,7 @@ export function AdminProductsPanel({ token }: AdminProductsPanelProps) {
     setError('');
 
     try {
-      const endpoint = editingProductId ? `/api/admin/products/${editingProductId}` : '/api/admin/products';
+      const endpoint = editingProductId ? apiUrl(`/api/admin/products/${editingProductId}`) : apiUrl('/api/admin/products');
       const method = editingProductId ? 'PATCH' : 'POST';
 
       await requestJson<{ product: Product }>(endpoint, {
@@ -176,7 +177,7 @@ export function AdminProductsPanel({ token }: AdminProductsPanelProps) {
     setError('');
 
     try {
-      await requestJson<void>(`/api/admin/products/${productId}`, {
+      await requestJson<void>(apiUrl(`/api/admin/products/${productId}`), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,

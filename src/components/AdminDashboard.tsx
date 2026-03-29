@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import type { AdminLoginResponse } from '../../shared/orders';
 import { AdminOrdersPanel } from './admin/AdminOrdersPanel';
 import { AdminProductsPanel } from './admin/AdminProductsPanel';
+import { apiUrl } from '../lib/api';
 
 const adminTokenStorageKey = 'essential-goods-admin-token';
 
@@ -34,7 +35,7 @@ export function AdminDashboard({ adminPath }: AdminDashboardProps) {
     setError('');
 
     try {
-      const response = await requestJson<AdminLoginResponse>('/api/admin/login', {
+      const response = await requestJson<AdminLoginResponse>(apiUrl('/api/admin/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

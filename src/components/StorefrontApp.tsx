@@ -13,6 +13,7 @@ import { Header } from './Header';
 import { ProductCard } from './ProductCard';
 import { ProductDetailModal } from './ProductDetailModal';
 import { Toast } from './Toast';
+import { apiUrl } from '../lib/api';
 
 interface ProductsResponse {
   products: Product[];
@@ -134,7 +135,7 @@ export function StorefrontApp() {
     setProductsLoading(true);
 
     try {
-      const response = await requestJson<ProductsResponse>('/api/products');
+      const response = await requestJson<ProductsResponse>(apiUrl('/api/products'));
       setProducts(response.products);
       setProductsError('');
     } catch (error) {
@@ -354,7 +355,7 @@ export function StorefrontApp() {
         const items = checkoutItemsRef.current;
         const mode = checkoutModeRef.current;
 
-        const response = await requestJson<CreateOrderResponse>('/api/orders', {
+        const response = await requestJson<CreateOrderResponse>(apiUrl('/api/orders'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
