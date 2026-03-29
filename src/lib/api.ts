@@ -2,7 +2,11 @@ function trimTrailingSlash(value: string) {
   return value.replace(/\/+$/, '');
 }
 
-export const apiBaseUrl = trimTrailingSlash(import.meta.env.VITE_API_BASE_URL ?? '');
+const fallbackApiBaseUrl = import.meta.env.DEV
+  ? 'http://localhost:3001'
+  : 'https://essentialgoods-api.essentialgoods-store.workers.dev';
+
+export const apiBaseUrl = trimTrailingSlash(import.meta.env.VITE_API_BASE_URL ?? fallbackApiBaseUrl);
 
 export function apiUrl(path: string) {
   if (!path.startsWith('/')) {
